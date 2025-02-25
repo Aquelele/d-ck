@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime, timezone
@@ -6,8 +7,9 @@ from enum import Enum
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
+CORS(app)
 
-app.debug = True
+#app.debug = True
 
 
 # sqlite:///./tires.db
@@ -27,9 +29,6 @@ with app.app_context():
     #os.remove("instance/tires.db")
     db.drop_all()
     db.create_all()
-
-
-
 
 
 class TirePosition(Enum):
@@ -89,7 +88,7 @@ class TireEntry(db.Model):
 
 @app.route("/")
 def hello():
-    return "Hello World!", 200
+    return "Hello World!", 200, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/addCar", methods=["POST"])
@@ -98,14 +97,15 @@ def add_car():
     car = Car(name=data["name"],  brand=data["brand"], model=data["model"], year=data["year"])
     db.session.add(car)
     db.session.commit()
-    return jsonify({"message": "Car added"}), 201
+    return jsonify({"message": "Car added"}), 201, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/getCars", methods=["GET"])
 def get_cars():
     cars = Car.query.all()
     cars = [{"id": car.id, "name":car.name, "brand": car.brand, "model": car.model, "year": car.year} for car in cars]
-    return jsonify(cars), 200
+    ret = {"cars": cars, "Access-Control-Allow-Origin": "*"}
+    return jsonify(cars), 200, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/addTire", methods=["POST"])
@@ -114,14 +114,14 @@ def add_tire():
     tire = Tire(serial=data["serial"], brand=data["brand"], model=data["model"], year=data["year"])
     db.session.add(tire)
     db.session.commit()
-    return jsonify({"message": "Tire added"}), 201
+    return jsonify({"message": "Tire added"}), 201, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/getTires", methods=["GET"])
 def get_tires():
     tires = Tire.query.all()
     tires = [{"id": tire.id, "serial": tire.serial, "brand": tire.brand, "model": tire.model, "year": tire.year} for tire in tires]
-    return jsonify(tires), 200
+    return jsonify(tires), 200, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/getTiresDataByCar", methods=["POST"])
@@ -133,7 +133,7 @@ def get_tires_data_by_car():
         tire_entries = TireEntry.query.filter_by(car_id=car).all()
         tire_entries = [{"id": tire_entry.id, "car_id": tire_entry.car_id, "position": tire_entry.position.name, "laps": tire_entry.laps, "mileage": tire_entry.mileage, "track_id": tire_entry.track_id} for tire_entry in tire_entries]
         tires_data.append({"id": tire.id, "serial": tire.serial, "brand": tire.brand, "model": tire.model, "year": tire.year, "entries": tire_entries})
-    return jsonify(tires_data), 200
+    return jsonify(tires_data), 200, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/addTrack", methods=["POST"])
@@ -142,14 +142,14 @@ def add_track():
     track = Track(name=data["name"], country=data["country"], city=data["city"], length=data["length"])
     db.session.add(track)
     db.session.commit()
-    return jsonify({"message": "Track added"}), 201
+    return jsonify({"message": "Track added"}), 201, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/getTracks", methods=["GET"])
 def get_tracks():
     tracks = Track.query.all()
     tracks = [{"id": track.id, "name": track.name, "country": track.country, "city": track.city, "length": track.length} for track in tracks]
-    return jsonify(tracks), 200
+    return jsonify(tracks), 200, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/addTireEntry", methods=["POST"])
@@ -158,7 +158,7 @@ def add_tire_entry():
     tire_entry = TireEntry(tire_serial=data["tire_serial"], car_id=data["car_id"], position=data["position"], laps=data["laps"], mileage=data["mileage"], track_id=data["track_id"])
     db.session.add(tire_entry)
     db.session.commit()
-    return jsonify({"message": "Tire entry added"}), 201
+    return jsonify({"message": "Tire entry added"}), 201, {"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/getTireEntries", methods=["post"])
@@ -166,11 +166,8 @@ def get_tire_entries():
     id = request.json["id"]
     tire_entries = TireEntry.query.filter_by(tire_serial=id).all()
     tire_entries = [{"id": tire_entry.id, "tire_serial": tire_entry.tire_serial, "car_id": tire_entry.car_id, "position": tire_entry.position.name, "laps": tire_entry.laps, "mileage": tire_entry.mileage, "track_id": tire_entry.track_id} for tire_entry in tire_entries]
-    return jsonify(tire_entries), 200
-
-
-
+    return jsonify(tire_entries), 200, {"Access-Control-Allow-Origin": "*"}
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()#debug=True)

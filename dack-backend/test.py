@@ -11,9 +11,22 @@ def addCar():
     url = "http://localhost:5000/addCar"
 
     data = {
-        "name": "Test Car",
-        "brand": "Test Brand",
-        "model": "Test Model",
+        "name": "Test Car2",
+        "brand": "Test Brand2",
+        "model": "Test Model2",
+        "year": 2022
+    }
+    response = requests.post(url, json=data)
+    return response
+
+
+def addTire():
+    url = "http://localhost:5000/addTire"
+
+    data = {
+        "serial": "Serial 4",
+        "brand": "IDLERS",
+        "model": "DEM WIDE BOYS",
         "year": 2021
     }
     response = requests.post(url, json=data)
@@ -26,6 +39,12 @@ if __name__ == "__main__":
     print(t.status_code)
     print(t.json)
 
-    c = addCar()
+    """c = addCar()
     print(c.status_code)
-    print(c.json)
+    print(c.json)"""
+
+    t = addTire()
+    print(t.status_code)
+    print(t.json)
+
+
