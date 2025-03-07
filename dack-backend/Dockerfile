@@ -1,22 +1,12 @@
-FROM python:3.11-slim
+FROM python:3.10.12
 
-ENV PYTHONDONTWRITEBYTECODE=1  
-ENV PYTHONUNBUFFERED=1 
+WORKDIR /dack-backend
 
-WORKDIR /app
+COPY requirements.txt ./
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+COPY . /dack-backend/
 
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+CMD ["gunicorn", "backend:app", "-b", "0.0.0.0:5000"]
 
-COPY . /app/
-
-EXPOSE 8000
-
-CMD ["python", "backend.py"]
