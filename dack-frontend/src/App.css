@@ -2,7 +2,6 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
 .logo {
@@ -52,4 +51,15 @@
   padding: 1px;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+
+.tire-info {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: none;
+  padding: 20px;
 }

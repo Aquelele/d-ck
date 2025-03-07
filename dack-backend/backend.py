@@ -14,7 +14,7 @@ CORS(app)
 
 # sqlite:///./tires.db
 
-db_uri = "sqlite:///./tires.db"
+db_uri = "sqlite:///./../tires.db"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 
@@ -130,9 +130,10 @@ def get_tires_data_by_car():
     tires = Tire.query.all()
     tires_data = []
     for tire in tires:
-        tire_entries = TireEntry.query.filter_by(car_id=car).all()
-        tire_entries = [{"id": tire_entry.id, "car_id": tire_entry.car_id, "position": tire_entry.position.name, "laps": tire_entry.laps, "mileage": tire_entry.mileage, "track_id": tire_entry.track_id} for tire_entry in tire_entries]
-        tires_data.append({"id": tire.id, "serial": tire.serial, "brand": tire.brand, "model": tire.model, "year": tire.year, "entries": tire_entries})
+        tire_entries = TireEntry.query.filter_by(car_id=car, tire_serial=tire.id).all()
+        tire_entries = [{"id": tire_entry.id, "car_id": car, "position": tire_entry.position.name, "laps": tire_entry.laps, "mileage": tire_entry.mileage, "track_id": tire_entry.track_id, "created_at": tire_entry.created_at} for tire_entry in tire_entries]
+        if len(tire_entries) > 0:
+            tires_data.append({"id": tire.id, "serial": tire.serial, "brand": tire.brand, "model": tire.model, "year": tire.year, "entries": tire_entries})
     return jsonify(tires_data), 200, {"Access-Control-Allow-Origin": "*"}
 
 
@@ -155,7 +156,8 @@ def get_tracks():
 @app.route("/addTireEntry", methods=["POST"])
 def add_tire_entry():
     data = request.json
-    tire_entry = TireEntry(tire_serial=data["tire_serial"], car_id=data["car_id"], position=data["position"], laps=data["laps"], mileage=data["mileage"], track_id=data["track_id"])
+    milage = Track.query.filter_by(id=data["track_id"]).first().length * data["laps"]
+    tire_entry = TireEntry(tire_serial=data["tire_serial"], car_id=data["car_id"], position=data["position"], laps=data["laps"], mileage=milage, track_id=data["track_id"])
     db.session.add(tire_entry)
     db.session.commit()
     return jsonify({"message": "Tire entry added"}), 201, {"Access-Control-Allow-Origin": "*"}
